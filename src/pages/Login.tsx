@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
+  Cable,
   Eye,
   EyeOff,
   KeyRound,
@@ -11,9 +12,41 @@ import {
   ShieldCheck,
   Wifi,
 } from 'lucide-react';
-import { api } from '../api';
+import { ApiError, api } from '../api';
 import { useAuth } from '../auth';
 import { Button, Field, Input, Spinner } from '../components/ui';
+import type { GatewayIdentity } from '../types';
+
+const VERIFIED_ROUTER = {
+  model: 'Sercomm SCER11BEL',
+  alias: 'Rogers Xfinity XER10',
+  firmware: '8.5.0.19',
+};
+
+function describeGateway(
+  identity: GatewayIdentity | null,
+  checking: boolean,
+  error: string,
+): string {
+  if (checking) return 'Checking this address…';
+  if (error) return error;
+  if (!identity) return 'Enter the gateway address';
+  if (!identity.reachable) return identity.message || 'No response from the gateway';
+  const brand = identity.brand ? `${identity.brand} ` : '';
+  const webui = identity.webui ? `${identity.webui} web UI` : 'web UI';
+  return identity.server ? `${brand}${webui} · ${identity.server}` : `${brand}${webui}`;
+}
+
+function compatibility(
+  identity: GatewayIdentity | null,
+  checking: boolean,
+  error: string,
+): { tone: string; label: string } {
+  if (checking) return { tone: 'badge-neutral', label: 'Checking…' };
+  if (error || !identity?.reachable) return { tone: 'badge-warn', label: 'No response' };
+  if (identity.webui) return { tone: 'badge-good', label: 'Compatible' };
+  return { tone: 'badge-warn', label: 'Unverified' };
+}
 
 export function LoginPage() {
   const { session, loading, signIn } = useAuth();
@@ -25,6 +58,9 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [identity, setIdentity] = useState<GatewayIdentity | null>(null);
+  const [identityError, setIdentityError] = useState('');
+  const [checkingIdentity, setCheckingIdentity] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -42,6 +78,43 @@ export function LoginPage() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    const target = gateway.trim();
+    if (!target) {
+      setIdentity(null);
+      setIdentityError('');
+      setCheckingIdentity(false);
+      return;
+    }
+    let active = true;
+    const timer = window.setTimeout(() => {
+      setCheckingIdentity(true);
+      api
+        .identify(target)
+        .then((info) => {
+          if (!active) return;
+          setIdentity(info);
+          setIdentityError('');
+        })
+        .catch((cause: unknown) => {
+          if (!active) return;
+          setIdentity(null);
+          setIdentityError(
+            cause instanceof ApiError && cause.code === 'invalid_gateway'
+              ? 'That gateway address does not look valid.'
+              : 'Could not reach that address.',
+          );
+        })
+        .finally(() => {
+          if (active) setCheckingIdentity(false);
+        });
+    }, 400);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [gateway]);
 
   if (loading) {
     return (
@@ -84,6 +157,8 @@ export function LoginPage() {
       setSubmitting(false);
     }
   }
+
+  const detection = compatibility(identity, checkingIdentity, identityError);
 
   return (
     <div className="login-screen">
@@ -129,6 +204,34 @@ export function LoginPage() {
           </li>
         </ul>
 
+        <div className="login-compat">
+          <div className="login-compat-head">
+            <Cable size={16} />
+            <strong>Compatibility</strong>
+            <span className={`badge ${detection.tone}`}>{detection.label}</span>
+          </div>
+          <dl className="login-compat-grid">
+            <div>
+              <dt>Built for</dt>
+              <dd>Rogers / Xfinity RDK-B gateways</dd>
+            </div>
+            <div>
+              <dt>Verified on</dt>
+              <dd>
+                {VERIFIED_ROUTER.model} ({VERIFIED_ROUTER.alias}) · firmware{' '}
+                {VERIFIED_ROUTER.firmware}
+              </dd>
+            </div>
+            <div>
+              <dt>Detected</dt>
+              <dd>{describeGateway(identity, checkingIdentity, identityError)}</dd>
+            </div>
+          </dl>
+          <p className="login-compat-note">
+            Model and firmware are read after sign-in under System → Hardware / Software.
+          </p>
+        </div>
+
         <p className="login-footnote">
           Runs entirely on your computer. Nothing is sent to a third-party service.
         </p>
@@ -152,7 +255,18 @@ export function LoginPage() {
             </div>
           )}
 
-          <Field label="Gateway address" hint={detectedGateway ? `Auto-detected ${detectedGateway}` : 'Usually 10.0.0.1'}>
+          <Field
+            label="Gateway address"
+            hint={
+              checkingIdentity
+                ? 'Checking this address…'
+                : identity?.reachable
+                  ? `Detected ${[identity.brand, identity.webui].filter(Boolean).join(' ') || 'gateway'}`
+                  : detectedGateway
+                    ? `Auto-detected ${detectedGateway}`
+                    : 'Usually 10.0.0.1'
+            }
+          >
             <div className="input-with-icon">
               <Network size={16} />
               <Input

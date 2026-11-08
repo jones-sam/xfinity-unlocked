@@ -2,6 +2,7 @@ import type {
   DeviceListResponse,
   DmzInfo,
   FirewallInfo,
+  GatewayIdentity,
   GatewayInfo,
   LogsResponse,
   MacFilterInfo,
@@ -94,6 +95,8 @@ function body(value: unknown): string {
 export const api = {
   session: () => request<SessionInfo>('/session'),
   gateway: () => request<GatewayInfo>('/gateway'),
+  identify: (gateway: string) =>
+    request<GatewayIdentity>(`/identify?gateway=${encodeURIComponent(gateway)}`),
   login: (credentials: { username: string; password: string; gateway: string }) =>
     request<SessionInfo>('/login', { method: 'POST', body: body(credentials) }),
   logout: () => request<SessionInfo>('/logout', { method: 'POST' }),

@@ -21,6 +21,7 @@ import {
   parseWifi,
 } from './router/parsers.js';
 import { PortForwardingService, type PfProtocol } from './router/pf.js';
+import { identifyGateway } from './router/identify.js';
 import { UpnpClient, gatewayHost } from './router/upnp.js';
 import { isVerbose, logHttp, logInfo } from './log.js';
 
@@ -286,6 +287,16 @@ app.get(
       detected: detected !== FALLBACK_GATEWAY || Boolean(process.env.XU_DEFAULT_GATEWAY),
       fallback: FALLBACK_GATEWAY,
     });
+  }),
+);
+
+// Pre-login probe so the sign-in screen can show what it is talking to.
+app.get(
+  '/api/identify',
+  route(async (req, res) => {
+    const requested = optionalString(req.query.gateway) || (await detectGateway());
+    const gateway = normalizeGateway(requested);
+    res.json(await identifyGateway(gateway));
   }),
 );
 

@@ -301,6 +301,18 @@ export interface GatewayInfo {
   fallback: string;
 }
 
+export interface GatewayIdentity {
+  gateway: string;
+  reachable: boolean;
+  status: number;
+  server: string;
+  title: string;
+  brand: string;
+  webui: string;
+  loginAction: string;
+  message: string;
+}
+
 export interface MacFilterInfo {
   ssid: number;
   mode: string;

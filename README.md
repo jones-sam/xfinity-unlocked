@@ -8,6 +8,11 @@ CloudUI can hide.
 The app runs on your computer, logs in to the router over your LAN, and keeps the
 router credentials only in server memory. Nothing is sent to a third party.
 
+Before sign-in, the login screen probes the gateway without credentials and shows
+its brand, web UI banner, and whether it serves the RDK-B login form, alongside
+the hardware and firmware this build has been verified on. The gateway's exact
+model and firmware are read after sign-in under **System → Hardware / Software**.
+
 ## Features
 
 - **Overview** — gateway, WAN/LAN addressing, connected clients, Wi-Fi summary,

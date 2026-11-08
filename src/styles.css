@@ -3133,6 +3133,67 @@ input[type='time'] {
   color: var(--accent);
 }
 
+.login-compat {
+  margin-top: 26px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #ffffff05;
+}
+
+.login-compat-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text-soft);
+}
+
+.login-compat-head svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.login-compat-head .badge {
+  margin-left: auto;
+}
+
+.login-compat-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.login-compat-grid > div {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+}
+
+.login-compat-grid dt {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.login-compat-grid dd {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-soft);
+  overflow-wrap: anywhere;
+}
+
+.login-compat-note {
+  margin-top: 10px;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--muted-2);
+}
+
 .login-footnote {
   margin-top: 32px;
   font-size: 11.5px;
