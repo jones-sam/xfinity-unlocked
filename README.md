@@ -65,6 +65,7 @@ Then open <http://127.0.0.1:4400>. `npm start` serves the compiled frontend from
 | `XU_DEFAULT_GATEWAY` | `10.0.0.1` | Fallback gateway if auto-detection fails |
 | `XU_DATA_DIR` | `./.data` | Where port-forwarding metadata is stored |
 | `XU_PF_SCAN_MAX` | `40` | Highest port-forwarding ID to probe |
+| `XU_VERBOSE` | unset | Set to `1` to log router JSON response bodies |
 
 The sign-in page fills in the detected default gateway automatically. You can
 override it with any hostname or IP address that serves the same RDK-B UI
@@ -102,6 +103,24 @@ The API process logs both sides of every operation:
 - `[app]` lines show sign-in, re-authentication, and session lifecycle events.
 
 Passwords, cookies, CSRF tokens, and request bodies are never logged.
+
+Verbose mode adds the JSON body of every router response on a single line:
+
+```bash
+npm run dev:verbose
+# or
+XU_VERBOSE=1 npm run dev
+# or, for a production-style run
+npm run start:verbose
+# (npm start -- --verbose is equivalent)
+```
+
+```text
+[12:34:56.792] [router:json] http://10.0.0.1 GET /actionHandler/ajax_parental_reports.jst?... {"entries":[]}
+```
+
+Verbose mode is off by default. Password, passkey, token, cookie, and secret
+fields are replaced with `[redacted]`; non-JSON responses are not printed.
 
 ### Router session recovery
 

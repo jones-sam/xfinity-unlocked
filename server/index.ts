@@ -22,7 +22,7 @@ import {
 } from './router/parsers.js';
 import { PortForwardingService, type PfProtocol } from './router/pf.js';
 import { UpnpClient, gatewayHost } from './router/upnp.js';
-import { logHttp, logInfo } from './log.js';
+import { isVerbose, logHttp, logInfo } from './log.js';
 
 const PORT = Number(process.env.PORT || 4400);
 const HOST = process.env.HOST || '127.0.0.1';
@@ -1358,4 +1358,5 @@ setInterval(() => {
 
 app.listen(PORT, HOST, () => {
   console.log(`Xfinity Unlocked API listening on http://${HOST}:${PORT}`);
+  if (isVerbose()) logInfo('verbose router JSON logging enabled');
 });

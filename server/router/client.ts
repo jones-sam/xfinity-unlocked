@@ -2,7 +2,7 @@ import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import { URLSearchParams } from 'node:url';
-import { logInfo, logRouterFailure, logRouterResult } from '../log.js';
+import { logInfo, logRouterFailure, logRouterJson, logRouterResult } from '../log.js';
 
 const MIN_GAP_MS = 120;
 const DEFAULT_TIMEOUT = 25_000;
@@ -143,6 +143,7 @@ export class RouterClient {
     try {
       const response = await this.http.request(config);
       logRouterResult(this.baseURL, method, path, response.status, Date.now() - started, responseSize(response.data));
+      logRouterJson(this.baseURL, method, path, response.data);
       return response;
     } catch (error) {
       logRouterFailure(this.baseURL, method, path, Date.now() - started, error);

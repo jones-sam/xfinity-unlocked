@@ -6,8 +6,10 @@
   "description": "A clean local dashboard for Rogers/Xfinity RDK-B routers with full port forwarding control.",
   "scripts": {
     "dev": "concurrently -k -n api,web -c cyan,magenta \"tsx watch server/index.ts\" \"vite\"",
+    "dev:verbose": "XU_VERBOSE=1 npm run dev",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
+    "start:verbose": "XU_VERBOSE=1 npm start",
     "preview": "vite preview",
     "check": "tsc -p tsconfig.json --noEmit"
   },
