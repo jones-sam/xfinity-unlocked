@@ -1,8 +1,13 @@
-# Xfinity Unlocked
+# Rogers Xfinity Unlocked
 
+## Purpose
+The default interface to my Rogers router does not let you port forward since they want you to use their stupid phone app. The API has endpoints for port forwarding, but they are not accessible in the default web UI. This application offers an alternative, cleaner UI with all the same functionality plus port forwarding without having to download their app.
+
+## Details
 A local, single-user dashboard for Rogers / Xfinity RDK-B gateways (tested on the
-Sercomm **SCER11BEL / XER10**, firmware **8.5.0.19**). It replaces the stock web UI
-with a faster React interface and adds port-forwarding management that the stock
+Sercomm **SCER11BEL / XER10**, firmware **8.5.0.19**). It might work on similar routers, depending if the api endpoints behave the same.
+
+It replaces the stock web UI with a faster React interface and adds port-forwarding management that the stock
 CloudUI can hide.
 
 The app runs on your computer, logs in to the router over your LAN, and keeps the
@@ -182,8 +187,10 @@ These come from the router's stock handlers, not this dashboard:
 - Diagnostic counts are limited to 1–4 by the firmware; traceroute can take over
   a minute.
 
-## Disclaimer
+## Adapting to your router
 
-This is an unofficial tool. It is not affiliated with Rogers, Comcast, Xfinity, or
-Sercomm. Router firmware varies; use at your own risk and keep a backup of any
-configuration you change.
+If your Rogers/Xfinity gateway runs newer firmware, or its pages and handlers
+differ, give your coding agent [`ADAPTING.md`](ADAPTING.md). It is a step-by-step
+playbook: capture the router's real pages, map features to pages and handlers,
+update the parsers and write paths, then verify changes without disturbing
+existing rules or credentials.
