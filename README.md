@@ -76,10 +76,42 @@ Then open <http://127.0.0.1:4400>. `npm start` serves the compiled frontend from
 | `XU_DATA_DIR` | `./.data` | Where port-forwarding metadata is stored |
 | `XU_PF_SCAN_MAX` | `40` | Highest port-forwarding ID to probe |
 | `XU_VERBOSE` | unset | Set to `1` to log router JSON response bodies |
+| `XU_ALLOWED_ORIGINS` | unset | Comma-separated extra origins allowed to submit writes (for a reverse proxy) |
 
 The sign-in page fills in the detected default gateway automatically. You can
 override it with any hostname or IP address that serves the same RDK-B UI
 (an optional `http://` or `https://` prefix is accepted).
+
+### LAN access
+
+The API listens on `127.0.0.1` by default. To use the dashboard from another
+device, set `HOST=0.0.0.0` (or a specific LAN address) and open
+`http://<host>:4400`. Writes are accepted when the browser's `Origin` matches the
+`Host` header, so direct LAN access works without extra configuration. Behind a
+reverse proxy, set `XU_ALLOWED_ORIGINS=https://dashboard.example.lan`.
+
+Only expose this on a trusted LAN: the browser talks to the dashboard over plain
+HTTP, so the router password crosses the network in the clear. Use an HTTPS
+reverse proxy or an SSH tunnel (`ssh -L 4400:127.0.0.1:4400 user@host`)
+otherwise.
+
+### Running as a service
+
+A minimal systemd unit lives at
+[`deploy/xfinity-unlocked.service`](deploy/xfinity-unlocked.service). It runs
+from your checkout as your own user, so no separate service account or `/opt`
+copy is needed. Edit `User`, `WorkingDirectory`, and `ExecStart`, then:
+
+```bash
+npm ci && npm run build
+sudo install -m 0644 deploy/xfinity-unlocked.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now xfinity-unlocked
+```
+
+Allow port 4400 from your LAN only, for example with
+`sudo ufw allow from 192.168.0.0/16 to any port 4400 proto tcp`. Update with
+`git pull && npm ci && npm run build && sudo systemctl restart xfinity-unlocked`.
 
 ## How it works
 

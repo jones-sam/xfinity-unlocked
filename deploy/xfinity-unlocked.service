@@ -1,0 +1,40 @@
+# Minimal systemd unit for Xfinity Unlocked.
+#
+# Edit the values marked CHANGE_ME, then install:
+#   npm ci && npm run build
+#   sudo install -m 0644 deploy/xfinity-unlocked.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now xfinity-unlocked
+#   journalctl -u xfinity-unlocked -f
+#
+# Keep devDependencies installed: the server runs through tsx, which is a
+# devDependency, so `npm ci --omit=dev` will not work.
+#
+# If Node came from nvm, replace /usr/bin/node with the output of
+# `command -v node`. Set HOST to one LAN address if you do not want to bind
+# every interface.
+
+[Unit]
+Description=Xfinity Unlocked router dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=CHANGE_ME
+WorkingDirectory=/home/CHANGE_ME/code/xfinity-unlocked
+Environment=NODE_ENV=production
+Environment=HOST=0.0.0.0
+Environment=PORT=4400
+ExecStart=/usr/bin/node node_modules/tsx/dist/cli.mjs server/index.ts
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+# Optional overrides without editing this file.
+# EnvironmentFile=-/etc/xfinity-unlocked.env
+
+[Install]
+WantedBy=multi-user.target

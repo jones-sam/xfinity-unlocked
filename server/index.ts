@@ -252,15 +252,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// Reject cross-site form posts.  Binding to localhost is not enough: another
-// web page could otherwise make the browser hit the local API.
+// Reject cross-site form posts. A request is same-origin when the Origin's
+// host and port match the Host header, which also covers access from another
+// machine on the LAN. Set XU_ALLOWED_ORIGINS (comma-separated absolute
+// origins) when running behind a reverse proxy that rewrites Host.
+const extraAllowedOrigins = new Set(
+  (process.env.XU_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((value) => value.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
+);
+
 app.use((req, res, next) => {
   if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
   const origin = req.headers.origin;
   if (!origin) return next();
   try {
-    const hostname = new URL(origin).hostname;
-    if (!['127.0.0.1', 'localhost', '::1', '[::1]'].includes(hostname)) {
+    const parsed = new URL(origin);
+    const sameHost = Boolean(req.headers.host) && parsed.host === req.headers.host;
+    if (!sameHost && !extraAllowedOrigins.has(parsed.origin)) {
       res.status(403).json({ error: { message: 'Cross-site requests are not allowed.', code: 'forbidden' } });
       return;
     }
